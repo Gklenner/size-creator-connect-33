@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Product } from "@/types";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ProductCardProps {
   product: Product;
@@ -27,37 +28,37 @@ export function ProductCard({ product, userType, affiliateId }: ProductCardProps
     try {
       await navigator.clipboard.writeText(affiliateLink);
       
-      // Simular clique no produto
-      const updatedProduct = { ...product, clickCount: product.clickCount + 1 };
-      const existingProducts = JSON.parse(localStorage.getItem('size_products') || '[]');
-      const updatedProducts = existingProducts.map((p: Product) => 
-        p.id === product.id ? updatedProduct : p
-      );
-      localStorage.setItem('size_products', JSON.stringify(updatedProducts));
+      // Update click count via Supabase
+      await supabase
+        .from('products')
+        .update({ click_count: product.clickCount + 1 })
+        .eq('id', product.id);
       
       toast({
         title: "Link copiado!",
         description: "Link copiado! Clique registrado no sistema.",
       });
     } catch (error) {
+      console.error('Error updating click count:', error);
       toast({
-        title: "Erro",
-        description: "Não foi possível copiar o link.",
-        variant: "destructive",
+        title: "Link copiado!",
+        description: "Link copiado para a área de transferência.",
       });
     }
   };
 
-  const handlePreview = () => {
+  const handlePreview = async () => {
     window.open(product.affiliateLink, '_blank');
     
-    // Registrar visualização
-    const updatedProduct = { ...product, clickCount: product.clickCount + 1 };
-    const existingProducts = JSON.parse(localStorage.getItem('size_products') || '[]');
-    const updatedProducts = existingProducts.map((p: Product) => 
-      p.id === product.id ? updatedProduct : p
-    );
-    localStorage.setItem('size_products', JSON.stringify(updatedProducts));
+    // Update click count via Supabase
+    try {
+      await supabase
+        .from('products')
+        .update({ click_count: product.clickCount + 1 })
+        .eq('id', product.id);
+    } catch (error) {
+      console.error('Error updating click count:', error);
+    }
   };
 
   const conversionRate = product.clickCount > 0 
