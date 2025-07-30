@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Size Platform Design System - Premium Professional Theme */
+
+@layer base {
+  :root {
+    /* Primary Brand Colors - Size Platform */
+    --background: 0 0% 100%;
+    --foreground: 215 25% 11%;
+    
+    /* Brand Colors - Modern Purple/Blue Gradient Theme */
+    --primary: 262 67% 55%;  /* Rich purple */
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 262 50% 70%;
+    --primary-dark: 262 80% 45%;
+    
+    /* Secondary Accent Colors */
+    --secondary: 210 40% 95%;
+    --secondary-foreground: 215 25% 15%;
+    --accent: 195 100% 50%;  /* Bright cyan for CTAs */
+    --accent-foreground: 0 0% 100%;
+    
+    /* Neutral Palette */
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 11%;
+    
+    /* Interactive States */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 262 67% 55%;
+    
+    /* Status Colors */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Surface Colors */
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 11%;
+    
+    /* Dashboard Specific */
+    --dashboard-sidebar: 262 30% 8%;
+    --dashboard-sidebar-foreground: 0 0% 95%;
+    --dashboard-accent: 262 50% 95%;
+    --dashboard-accent-foreground: 262 30% 20%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(262, 67%, 55%), hsl(195, 100%, 50%));
+    --gradient-secondary: linear-gradient(135deg, hsl(262, 50%, 70%), hsl(262, 67%, 55%));
+    --gradient-hero: linear-gradient(135deg, hsl(262, 67%, 55%) 0%, hsl(195, 100%, 50%) 100%);
+    
+    /* Shadows */
+    --shadow-primary: 0 10px 30px -10px hsl(262 67% 55% / 0.3);
+    --shadow-card: 0 4px 20px -4px hsl(215 25% 11% / 0.1);
+    --shadow-glow: 0 0 40px hsl(262 67% 55% / 0.4);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 215 25% 6%;
+    --foreground: 0 0% 95%;
+    
+    --primary: 262 67% 65%;
+    --primary-foreground: 215 25% 6%;
+    --primary-light: 262 50% 75%;
+    --primary-dark: 262 80% 55%;
+    
+    --secondary: 215 25% 12%;
+    --secondary-foreground: 0 0% 90%;
+    --accent: 195 100% 60%;
+    --accent-foreground: 215 25% 6%;
+    
+    --muted: 215 25% 12%;
+    --muted-foreground: 215 16% 65%;
+    --card: 215 25% 8%;
+    --card-foreground: 0 0% 95%;
+    
+    --border: 215 25% 18%;
+    --input: 215 25% 18%;
+    --ring: 262 67% 65%;
+    
+    --success: 142 76% 46%;
+    --warning: 38 92% 60%;
+    --destructive: 0 84% 70%;
+    
+    --popover: 215 25% 8%;
+    --popover-foreground: 0 0% 95%;
+    
+    --dashboard-sidebar: 215 25% 4%;
+    --dashboard-sidebar-foreground: 0 0% 95%;
+    --dashboard-accent: 262 30% 15%;
+    --dashboard-accent-foreground: 0 0% 85%;
+    
+    --gradient-primary: linear-gradient(135deg, hsl(262, 67%, 65%), hsl(195, 100%, 60%));
+    --gradient-secondary: linear-gradient(135deg, hsl(262, 50%, 75%), hsl(262, 67%, 65%));
+    --gradient-hero: linear-gradient(135deg, hsl(262, 67%, 65%) 0%, hsl(195, 100%, 60%) 100%);
+    
+    --shadow-primary: 0 10px 30px -10px hsl(262 67% 65% / 0.4);
+    --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.3);
+    --shadow-glow: 0 0 40px hsl(262 67% 65% / 0.5);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
