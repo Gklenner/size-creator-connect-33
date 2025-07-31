@@ -32,12 +32,12 @@ const queryClient = new QueryClient({
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <NotificationToaster />
-        <BrowserRouter>
-          <AuthProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <NotificationToaster />
+          <BrowserRouter>
             <Suspense fallback={<PageLoader text="Carregando página..." />}>
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -50,9 +50,9 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
-          </AuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );
