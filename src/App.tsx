@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider, ProtectedRoute } from "@/components/Auth/AuthProvider";
+import { AuthProvider } from "@/components/Auth/AuthProvider";
 import { NotificationToaster } from "@/components/Layout/NotificationToaster";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { Suspense } from "react";
@@ -43,26 +43,10 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/dashboard" element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="/products/create" element={
-                  <ProtectedRoute>
-                    <CreateProduct />
-                  </ProtectedRoute>
-                } />
-                <Route path="/analytics" element={
-                  <ProtectedRoute>
-                    <Analytics />
-                  </ProtectedRoute>
-                } />
-                <Route path="/materials" element={
-                  <ProtectedRoute>
-                    <Materials />
-                  </ProtectedRoute>
-                } />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/products/create" element={<CreateProduct />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/materials" element={<Materials />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

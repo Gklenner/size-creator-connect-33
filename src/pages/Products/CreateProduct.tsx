@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { useProducts } from "@/hooks/useProducts";
 import { 
   ArrowLeft, 
   Upload, 
@@ -58,7 +57,6 @@ export default function CreateProduct() {
   const [isLoading, setIsLoading] = useState(false);
   
   const { user } = useAuth();
-  const { createProduct } = useProducts();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -88,30 +86,46 @@ export default function CreateProduct() {
     setIsLoading(true);
 
     try {
-      await createProduct({
+      // Mock product creation - substituir por Supabase
+      const newProduct = {
+        id: Math.random().toString(36).substr(2, 9),
+        creatorId: user.uid,
         title,
         description,
         category,
         price: parseFloat(price),
         commission: parseFloat(commission),
         affiliateLink,
-      });
+        materials: {
+          instagram: instagramMaterials,
+          tiktok: tiktokMaterials,
+          email: emailMaterials,
+          banners: bannerMaterials,
+        },
+        createdAt: new Date(),
+        isActive: true,
+        clickCount: 0,
+        conversionCount: 0,
+      };
 
-      // Reset form
-      setTitle("");
-      setDescription("");
-      setCategory("");
-      setPrice("");
-      setCommission("");
-      setAffiliateLink("");
-      setInstagramMaterials([]);
-      setTiktokMaterials([]);
-      setEmailMaterials([]);
-      setBannerMaterials([]);
+      // Salvar no localStorage temporariamente
+      const existingProducts = JSON.parse(localStorage.getItem('size_products') || '[]');
+      existingProducts.push(newProduct);
+      localStorage.setItem('size_products', JSON.stringify(existingProducts));
+
+      toast({
+        title: "Produto criado com sucesso!",
+        description: `${title} foi criado e está ativo para afiliados.`,
+      });
       
       navigate("/dashboard");
     } catch (error) {
       console.error('Error creating product:', error);
+      toast({
+        title: "Erro ao criar produto",
+        description: "Verifique os dados e tente novamente.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }

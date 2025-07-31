@@ -18,11 +18,55 @@ import {
 import { Input } from "@/components/ui/input";
 import { Product, DashboardStats } from "@/types";
 import { useAuth } from "@/hooks/useAuth";
-import { useProducts } from "@/hooks/useProducts";
+
+// Mock products - será substituído por dados reais do Supabase
+const getInitialProducts = (): Product[] => [
+  {
+    id: "1",
+    creatorId: "creator1",
+    title: "Curso de Marketing Digital",
+    description: "Aprenda as melhores estratégias de marketing digital para alavancar seus negócios online.",
+    affiliateLink: "https://exemplo.com/produto1",
+    category: "Educação",
+    commission: 30,
+    materials: {
+      instagram: ["post1.jpg", "story1.jpg"],
+      tiktok: ["video1.mp4"],
+      email: ["template1.html"],
+      banners: ["banner1.jpg", "banner2.jpg"]
+    },
+    createdAt: new Date(),
+    isActive: true,
+    clickCount: 234,
+    conversionCount: 18,
+    price: 197.00
+  },
+  {
+    id: "2",
+    creatorId: "creator2",
+    title: "E-book: Vendas no Digital",
+    description: "Guia completo para aumentar suas vendas no ambiente digital.",
+    affiliateLink: "https://exemplo.com/produto2",
+    category: "E-book",
+    commission: 50,
+    materials: {
+      instagram: ["post2.jpg"],
+      tiktok: [],
+      email: ["template2.html"],
+      banners: ["banner3.jpg"]
+    },
+    createdAt: new Date(),
+    isActive: true,
+    clickCount: 89,
+    conversionCount: 12,
+    price: 47.00
+  }
+];
 
 export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [products, setProducts] = useState<Product[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
     totalClicks: 0,
     totalConversions: 0,
@@ -32,36 +76,46 @@ export default function Dashboard() {
   });
   
   const { user, logout } = useAuth();
-  const { products, filteredProducts, setSearchQuery, setSelectedCategory: setProductCategory } = useProducts();
-
-  // Sync search with products hook
-  useEffect(() => {
-    setSearchQuery(searchTerm);
-  }, [searchTerm, setSearchQuery]);
 
   useEffect(() => {
-    setProductCategory(selectedCategory);
-  }, [selectedCategory, setProductCategory]);
+    // Carregar produtos do localStorage ou usar dados mock
+    const savedProducts = localStorage.getItem('size_products');
+    if (savedProducts) {
+      const parsedProducts = JSON.parse(savedProducts);
+      setProducts(parsedProducts);
+    } else {
+      const initialProducts = getInitialProducts();
+      setProducts(initialProducts);
+      localStorage.setItem('size_products', JSON.stringify(initialProducts));
+    }
 
-  // Calculate stats based on current products
-  useEffect(() => {
-    if (products.length > 0) {
-      const totalClicks = products.reduce((sum, p) => sum + p.clickCount, 0);
-      const totalConversions = products.reduce((sum, p) => sum + p.conversionCount, 0);
-      const totalEarnings = products.reduce((sum, p) => sum + (p.conversionCount * p.price * p.commission / 100), 0);
+    // Calcular estatísticas baseadas nos produtos
+    const calculateStats = (productList: Product[]) => {
+      const totalClicks = productList.reduce((sum, p) => sum + p.clickCount, 0);
+      const totalConversions = productList.reduce((sum, p) => sum + p.conversionCount, 0);
+      const totalEarnings = productList.reduce((sum, p) => sum + (p.conversionCount * p.price * p.commission / 100), 0);
       const conversionRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0;
 
-      setStats({
+      return {
         totalClicks,
         totalConversions,
         totalEarnings,
-        activeProducts: products.filter(p => p.isActive).length,
+        activeProducts: productList.filter(p => p.isActive).length,
         conversionRate: Number(conversionRate.toFixed(1)),
-      });
+      };
+    };
+
+    if (products.length > 0) {
+      setStats(calculateStats(products));
     }
   }, [products]);
 
-  const displayProducts = filteredProducts.length > 0 ? filteredProducts : products;
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   if (!user) {
     return (
@@ -180,7 +234,7 @@ export default function Dashboard() {
 
             {/* Products Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayProducts.map((product) => (
+              {filteredProducts.map((product) => (
                 <ProductCard
                   key={product.id}
                   product={product}
@@ -190,7 +244,7 @@ export default function Dashboard() {
               ))}
             </div>
 
-            {displayProducts.length === 0 && (
+            {filteredProducts.length === 0 && (
               <Card>
                 <CardContent className="text-center py-12">
                   <div className="text-muted-foreground mb-4">

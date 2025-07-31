@@ -2,29 +2,8 @@ import { useCallback, useEffect } from "react";
 import { useStore } from "@/store/useStore";
 import { Product } from "@/types";
 import { ProductFormData } from "@/lib/validations";
-import { supabase } from "@/integrations/supabase/client";
 
-// Transform Supabase product to app product format
-const transformProduct = (dbProduct: any): Product => ({
-  id: dbProduct.id,
-  creatorId: dbProduct.creator_id,
-  title: dbProduct.title,
-  description: dbProduct.description,
-  affiliateLink: dbProduct.affiliate_link,
-  category: dbProduct.category,
-  commission: Number(dbProduct.commission),
-  price: Number(dbProduct.price),
-  materials: dbProduct.materials || {
-    instagram: [],
-    tiktok: [],
-    email: [],
-    banners: [],
-  },
-  createdAt: new Date(dbProduct.created_at),
-  isActive: dbProduct.is_active,
-  clickCount: dbProduct.click_count,
-  conversionCount: dbProduct.conversion_count,
-});
+const PRODUCTS_KEY = 'size_products';
 
 export const useProducts = () => {
   const { 
@@ -42,63 +21,55 @@ export const useProducts = () => {
     addNotification 
   } = useStore();
 
-  // Load products from Supabase on mount
+  // Load products from localStorage on mount
   useEffect(() => {
-    const loadProducts = async () => {
+    const savedProducts = localStorage.getItem(PRODUCTS_KEY);
+    if (savedProducts) {
       try {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error) {
-          console.error('Error loading products:', error);
-          // Fallback to mock data if needed for development
-          setProducts(generateMockProducts());
-          return;
-        }
-
-        const transformedProducts = data.map(transformProduct);
-        setProducts(transformedProducts);
+        const parsedProducts = JSON.parse(savedProducts);
+        setProducts(parsedProducts);
       } catch (error) {
         console.error('Error loading products:', error);
-        setProducts(generateMockProducts());
       }
-    };
-
-    loadProducts();
+    } else {
+      // Initialize with mock data
+      setProducts(generateMockProducts());
+    }
   }, [setProducts]);
 
   const createProduct = useCallback(async (data: ProductFormData): Promise<void> => {
     if (!user) throw new Error('Usuário não autenticado');
     
     try {
-      const { data: newProduct, error } = await supabase
-        .from('products')
-        .insert({
-          creator_id: user.uid,
-          title: data.title,
-          description: data.description,
-          affiliate_link: data.affiliateLink,
-          category: data.category,
-          commission: data.commission,
-          price: data.price,
-          materials: {
-            instagram: [],
-            tiktok: [],
-            email: [],
-            banners: [],
-          },
-        })
-        .select()
-        .single();
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      if (error) {
-        throw new Error('Erro ao criar produto');
-      }
+      const newProduct: Product = {
+        id: `product_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        creatorId: user.uid,
+        title: data.title,
+        description: data.description,
+        affiliateLink: data.affiliateLink,
+        category: data.category,
+        commission: data.commission,
+        price: data.price,
+        materials: {
+          instagram: [],
+          tiktok: [],
+          email: [],
+          banners: [],
+        },
+        createdAt: new Date(),
+        isActive: true,
+        clickCount: 0,
+        conversionCount: 0,
+      };
 
-      const transformedProduct = transformProduct(newProduct);
-      addProduct(transformedProduct);
+      addProduct(newProduct);
+      
+      // Save to localStorage
+      const updatedProducts = [...products, newProduct];
+      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(updatedProducts));
       
       addNotification({
         type: 'success',
@@ -112,31 +83,22 @@ export const useProducts = () => {
       });
       throw error;
     }
-  }, [user, addProduct, addNotification]);
+  }, [user, products, addProduct, addNotification]);
 
   const editProduct = useCallback(async (productId: string, data: Partial<ProductFormData>): Promise<void> => {
     if (!user) throw new Error('Usuário não autenticado');
     
     try {
-      const updateData: any = {};
-      if (data.title) updateData.title = data.title;
-      if (data.description) updateData.description = data.description;
-      if (data.affiliateLink) updateData.affiliate_link = data.affiliateLink;
-      if (data.category) updateData.category = data.category;
-      if (data.commission !== undefined) updateData.commission = data.commission;
-      if (data.price !== undefined) updateData.price = data.price;
-
-      const { error } = await supabase
-        .from('products')
-        .update(updateData)
-        .eq('id', productId)
-        .eq('creator_id', user.uid);
-
-      if (error) {
-        throw new Error('Erro ao atualizar produto');
-      }
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 800));
 
       updateProduct(productId, data);
+      
+      // Save to localStorage
+      const updatedProducts = products.map(p => 
+        p.id === productId ? { ...p, ...data } : p
+      );
+      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(updatedProducts));
       
       addNotification({
         type: 'success',
@@ -150,23 +112,20 @@ export const useProducts = () => {
       });
       throw error;
     }
-  }, [user, updateProduct, addNotification]);
+  }, [user, products, updateProduct, addNotification]);
 
   const removeProduct = useCallback(async (productId: string): Promise<void> => {
     if (!user) throw new Error('Usuário não autenticado');
     
     try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', productId)
-        .eq('creator_id', user.uid);
-
-      if (error) {
-        throw new Error('Erro ao remover produto');
-      }
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       deleteProduct(productId);
+      
+      // Save to localStorage
+      const updatedProducts = products.filter(p => p.id !== productId);
+      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(updatedProducts));
       
       addNotification({
         type: 'success',
@@ -180,28 +139,21 @@ export const useProducts = () => {
       });
       throw error;
     }
-  }, [user, deleteProduct, addNotification]);
+  }, [user, products, deleteProduct, addNotification]);
 
   const toggleProductStatus = useCallback(async (productId: string): Promise<void> => {
-    if (!user) throw new Error('Usuário não autenticado');
-    
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
     try {
       const newStatus = !product.isActive;
-      
-      const { error } = await supabase
-        .from('products')
-        .update({ is_active: newStatus })
-        .eq('id', productId)
-        .eq('creator_id', user.uid);
-
-      if (error) {
-        throw new Error('Erro ao alterar status do produto');
-      }
-
       updateProduct(productId, { isActive: newStatus });
+      
+      // Save to localStorage
+      const updatedProducts = products.map(p => 
+        p.id === productId ? { ...p, isActive: newStatus } : p
+      );
+      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(updatedProducts));
       
       addNotification({
         type: 'success',
@@ -215,7 +167,7 @@ export const useProducts = () => {
       });
       throw error;
     }
-  }, [user, products, updateProduct, addNotification]);
+  }, [products, updateProduct, addNotification]);
 
   // Get user's products (for creators)
   const getUserProducts = useCallback(() => {
